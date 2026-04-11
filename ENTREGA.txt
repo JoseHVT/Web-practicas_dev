@@ -1,0 +1,266 @@
+================================================================================
+                    REST-API LOGIN - ENTREGA FINAL
+================================================================================
+
+REPOSITORIO:
+https://github.com/JoseHVT/Web-A2-Login-con-React-y-Material-UI
+
+================================================================================
+                            REQUISITOS PREVIOS
+================================================================================
+
+1. Node.js instalado (npm)
+2. MongoDB Community instalado y ejecutándose
+   - Descargar: https://www.mongodb.com/try/download/community
+   - Instalar con opción "Install MongoDB as a Windows Service"
+   - Si está instalado, MongoDB Compass debe abrir automáticamente
+
+================================================================================
+                          INSTRUCCIONES DE EJECUCIÓN
+================================================================================
+
+PASO 1: Abrir 3 Terminales (PowerShell)
+
+TERMINAL 1 - MongoDB ya está corriendo
+   (Si MongoDB Compass está abierto, significa que ya corre)
+
+TERMINAL 2 - Iniciar Backend (API)
+   cd api
+   npm run dev
+
+   Deberías ver:
+   ✓ Conexión a MongoDB exitosa
+   ✓ Servidor ejecutándose en http://localhost:3000
+     Base de datos: Conectada
+
+TERMINAL 3 - Iniciar Frontend (React)
+   npm run dev
+
+   Deberías ver:
+   VITE v8.0.1 ready in XXX ms
+   ➜  Local:   http://localhost:5173/
+
+================================================================================
+                           PRUEBA - OPCIÓN 1 (RECOMENDADO)
+                        Interfaz Visual en el Navegador
+================================================================================
+
+1. Abre el navegador: http://localhost:5173/test-api
+
+2. Verás dos pestañas:
+
+   PESTAÑA 1: "👥 Usuarios CRUD"
+   - Crear usuario con nombre, email y rol
+   - Ver tabla de usuarios guardados en MongoDB
+   - Eliminar usuarios
+   - Los datos persisten en la base de datos
+
+   PESTAÑA 2: "🔐 Login & Registro"
+   - Sección "📝 Registrar Nueva Cuenta"
+     * Usuario: testuser
+     * Email: test@example.com
+     * Contraseña: password123 (MÍNIMO 6 caracteres)
+     * Confirmar: password123
+     * Click "Registrarse"
+     * Deberías ver: "Registro exitoso"
+     * La cuenta aparece en la tabla de abajo
+
+   - Sección "🔓 Probar Login"
+     * Usuario: testuser
+     * Contraseña: password123
+     * Click "LOGIN"
+     * Deberías ver: "Login exitoso" con Token
+
+3. VERIFICACIÓN EN MONGODB
+   - Cada vez que registres/crees un dato, se guarda en MongoDB
+   - Las contraseñas se hashean automáticamente (nunca en texto plano)
+   - Los datos persisten aunque reinicies los servidores
+
+================================================================================
+                           PRUEBA - OPCIÓN 2 (POSTMAN)
+                              Via API Endpoints
+================================================================================
+
+Si prefieres usar Postman en lugar de la interfaz visual:
+
+VER ARCHIVO: POSTMAN.md
+(Contiene todos los endpoints con ejemplos listos para copiar/pegar)
+
+================================================================================
+                          ESTRUCTURA DEL PROYECTO
+================================================================================
+
+📁 api/                          (Backend - Node.js + Express + MongoDB)
+   ├── config/db.js              Conexión a MongoDB
+   ├── models/
+   │   ├── User.js               Esquema de Usuarios
+   │   └── LoginAccount.js       Esquema de Cuentas de Login
+   ├── controllers/
+   │   ├── userController.js     CRUD de usuarios
+   │   └── loginController.js    Registro, login, cambio contraseña
+   ├── routes/
+   │   ├── users.js              GET/POST/PUT/DELETE /users
+   │   └── login.js              GET/POST/PUT/DELETE /login
+   ├── .env                      Configuración MongoDB
+   ├── index.js                  Servidor principal
+   └── package.json              Dependencias
+
+📁 src/                          (Frontend - React + Material-UI)
+   ├── views/
+   │   ├── APITester.jsx         ⭐ PÁGINA DE PRUEBAS (http://localhost:5173/test-api)
+   │   ├── Login.jsx             Página de login original
+   │   └── Dashboard.jsx         Dashboard post-login
+   ├── App.jsx                   Router de la aplicación
+   └── ...
+
+📄 POSTMAN.md                    Documentación de endpoints para Postman
+📄 SETUP.md                      Guía completa de configuración
+
+================================================================================
+                            ENDPOINTS DISPONIBLES
+================================================================================
+
+BASE: http://localhost:3000
+
+RUTAS INICIALES:
+  GET  /              Bienvenida
+  GET  /ping          Health check
+  GET  /marco         Marco Polo
+
+USUARIOS CRUD:
+  GET    /users                Obtener todos
+  GET    /users/:id            Obtener por ID
+  POST   /users                Crear usuario
+  PUT    /users/:id            Actualizar usuario
+  DELETE /users/:id            Eliminar usuario
+
+LOGIN & AUTENTICACIÓN:
+  POST   /login                Login (devuelve token)
+  POST   /login/register       Registrar nueva cuenta
+  GET    /login                Ver todas las cuentas
+  PUT    /login/password       Cambiar contraseña
+  DELETE /login/:id            Eliminar cuenta
+
+================================================================================
+                          CARACTERÍSTICAS IMPLEMENTADAS
+================================================================================
+
+✅ Node.js + Express (5 paquetes requeridos)
+✅ MongoDB local (persistencia real)
+✅ Mongoose (validación y esquemas)
+✅ bcryptjs (contraseñas hasheadas)
+✅ CORS habilitado
+✅ Morgan para logging HTTP
+✅ Rutas: / /marco /ping
+✅ CRUD completo /users
+✅ CRUD completo /login
+✅ Controladores separados
+✅ Interfaz visual para probar en vivo
+✅ Documentación Postman
+✅ Código probado y funcionando
+
+================================================================================
+                       VALIDACIONES IMPLEMENTADAS
+================================================================================
+
+USUARIOS:
+  - Nombre: requerido
+  - Email: único, requerido
+  - Rol: "user" o "admin"
+
+CUENTAS DE LOGIN:
+  - Usuario: único, mínimo 3 caracteres
+  - Email: único, requerido
+  - Contraseña: mínimo 6 caracteres (hasheada con bcrypt)
+  - Las contraseñas NO se devuelven en GET /login (seguridad)
+
+================================================================================
+                          NOTAS IMPORTANTES
+================================================================================
+
+⚠️  MONGODB DEBE ESTAR CORRIENDO
+   Si ves "Iniciando servidor sin conexión a MongoDB", significa que
+   MongoDB no está disponible. Abre MongoDB Compass para verificar.
+
+⚠️  CONTRASEÑA MÍNIMO 6 CARACTERES
+   No puedes registrarte con contraseña menor a 6 caracteres.
+
+⚠️  DATOS PERSISTENTES
+   Los datos se guardan en MongoDB. No se pierden al reiniciar.
+   Para limpiar la base de datos, abre MongoDB Compass y elimina
+   la colección o la base de datos.
+
+⚠️  PUERTOS
+   Frontend: http://localhost:5173
+   Backend:  http://localhost:3000
+   MongoDB:  localhost:27017
+
+================================================================================
+                             SOLUCIÓN DE PROBLEMAS
+================================================================================
+
+P: "ECONNREFUSED" o error de conexión
+R: MongoDB no está ejecutándose. Abre MongoDB Compass o ejecuta "mongod"
+
+P: Puerto 3000 ya en uso
+R: Cierra otra aplicación en ese puerto o cambia PORT en api/.env
+
+P: npm: comando no encontrado
+R: Node.js no está instalado. Descarga desde nodejs.org
+
+P: Contraseña rechazada en login
+R: Verifica que sea la contraseña correcta y mínimo 6 caracteres
+
+P: Cambios en código no se aplican
+R: Nodemon debería recargar automáticamente. Si no, presiona Ctrl+C
+   y ejecuta "npm run dev" nuevamente.
+
+================================================================================
+                        CÓMO ENTREGAR AL PROFESOR
+================================================================================
+
+El profesor debe:
+
+1. Clonar el repositorio:
+   git clone https://github.com/JoseHVT/Web-A2-Login-con-React-y-Material-UI.git
+
+2. Instalar MongoDB Community si no lo tiene
+
+3. Abrir 3 terminales y ejecutar:
+   Terminal 1: (MongoDB ya corre)
+   Terminal 2: cd api && npm run dev
+   Terminal 3: npm run dev
+
+4. Abrir navegador: http://localhost:5173/test-api
+
+5. ¡Probar y ver todo funcionando en vivo!
+
+================================================================================
+                            ENLACES ÚTILES
+================================================================================
+
+Repositorio GitHub:
+https://github.com/JoseHVT/Web-A2-Login-con-React-y-Material-UI
+
+MongoDB Compass (UI local):
+https://www.mongodb.com/products/compass
+
+Documentación completa:
+- POSTMAN.md  → Todos los endpoints con ejemplos
+- SETUP.md    → Configuración detallada
+
+================================================================================
+                              RESUMEN FINAL
+================================================================================
+
+✓ REST-API completamente funcional
+✓ Datos persistentes en MongoDB
+✓ Interfaz visual para probar (http://localhost:5173/test-api)
+✓ Contraseñas seguras (hasheadas)
+✓ Documentación Postman incluida
+✓ Todo probado y validado
+✓ Ready to deploy
+
+Listo para entrega. ✅
+
+================================================================================
