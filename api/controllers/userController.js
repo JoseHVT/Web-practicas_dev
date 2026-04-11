@@ -1,108 +1,151 @@
-// Base de datos simulada
-let users = [
-  { id: 1, name: 'Juan', email: 'juan@example.com', role: 'admin' },
-  { id: 2, name: 'María', email: 'maria@example.com', role: 'user' }
-];
-
-let nextId = 3;
+const User = require('../models/User');
 
 // GET - Obtener todos los usuarios
-exports.getUsers = (req, res) => {
-  res.json({
-    success: true,
-    data: users,
-    count: users.length
-  });
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json({
+      success: true,
+      data: users,
+      count: users.length
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener usuarios',
+      error: error.message
+    });
+  }
 };
 
 // GET - Obtener usuario por ID
-exports.getUserById = (req, res) => {
-  const { id } = req.params;
-  const user = users.find(u => u.id === parseInt(id));
+exports.getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
 
-  if (!user) {
-    return res.status(404).json({
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      message: 'Usuario no encontrado'
+      message: 'Error al obtener usuario',
+      error: error.message
     });
   }
-
-  res.json({
-    success: true,
-    data: user
-  });
 };
 
 // POST - Crear nuevo usuario
-exports.createUser = (req, res) => {
-  const { name, email, role } = req.body;
+exports.createUser = async (req, res) => {
+  try {
+    const { name, email, role } = req.body;
 
-  // Validación básica
-  if (!name || !email) {
-    return res.status(400).json({
+    // Validación básica
+    if (!name || !email) {
+      return res.status(400).json({
+        success: false,
+        message: 'El nombre y email son requeridos'
+      });
+    }
+
+    // Verificar si el email ya existe
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: 'El email ya está registrado'
+      });
+    }
+
+    const newUser = new User({
+      name,
+      email,
+      role: role || 'user'
+    });
+
+    await newUser.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Usuario creado exitosamente',
+      data: newUser
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      message: 'El nombre y email son requeridos'
+      message: 'Error al crear usuario',
+      error: error.message
     });
   }
-
-  const newUser = {
-    id: nextId++,
-    name,
-    email,
-    role: role || 'user'
-  };
-
-  users.push(newUser);
-
-  res.status(201).json({
-    success: true,
-    message: 'Usuario creado exitosamente',
-    data: newUser
-  });
 };
 
 // PUT - Actualizar usuario
-exports.updateUser = (req, res) => {
-  const { id } = req.params;
-  const { name, email, role } = req.body;
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, role } = req.body;
 
-  const user = users.find(u => u.id === parseInt(id));
+    const user = await User.findById(id);
 
-  if (!user) {
-    return res.status(404).json({
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (role) user.role = role;
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Usuario actualizado exitosamente',
+      data: user
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      message: 'Usuario no encontrado'
+      message: 'Error al actualizar usuario',
+      error: error.message
     });
   }
-
-  if (name) user.name = name;
-  if (email) user.email = email;
-  if (role) user.role = role;
-
-  res.json({
-    success: true,
-    message: 'Usuario actualizado exitosamente',
-    data: user
-  });
 };
 
 // DELETE - Eliminar usuario
-exports.deleteUser = (req, res) => {
-  const { id } = req.params;
-  const userIndex = users.findIndex(u => u.id === parseInt(id));
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByIdAndDelete(id);
 
-  if (userIndex === -1) {
-    return res.status(404).json({
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Usuario eliminado exitosamente',
+      data: user
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      message: 'Usuario no encontrado'
+      message: 'Error al eliminar usuario',
+      error: error.message
     });
   }
-
-  const deletedUser = users.splice(userIndex, 1);
-
-  res.json({
-    success: true,
-    message: 'Usuario eliminado exitosamente',
-    data: deletedUser[0]
-  });
 };

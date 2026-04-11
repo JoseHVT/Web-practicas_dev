@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const morgan = require('morgan');
+const connectDB = require('./config/db');
 
 dotenv.config();
 
@@ -18,7 +19,8 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.json({
     message: 'Bienvenido a la REST-API',
-    status: 'active'
+    status: 'active',
+    version: '2.0 - Con MongoDB'
   });
 });
 
@@ -36,10 +38,10 @@ app.get('/ping', (req, res) => {
   });
 });
 
-// Rutas de usuarios (por implementar)
+// Rutas de usuarios
 app.use('/users', require('./routes/users'));
 
-// Rutas de login (por implementar)
+// Rutas de login
 app.use('/login', require('./routes/login'));
 
 // Manejo de rutas no encontradas
@@ -53,8 +55,23 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
-  console.log(`Entorno: ${process.env.NODE_ENV}`);
-});
+// Conectar a MongoDB e iniciar servidor
+const startServer = async () => {
+  const connected = await connectDB();
+
+  if (!connected) {
+    console.log('\n⚠️  Iniciando servidor sin conexión a MongoDB');
+    console.log('   Los datos NO se guardarán\n');
+  }
+
+  app.listen(PORT, () => {
+    console.log(`✓ Servidor ejecutándose en http://localhost:${PORT}`);
+    console.log(`  Entorno: ${process.env.NODE_ENV}`);
+    if (connected) {
+      console.log('  Base de datos: Conectada\n');
+    }
+  });
+};
+
+startServer();
+
