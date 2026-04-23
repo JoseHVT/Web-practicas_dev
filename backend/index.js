@@ -2,7 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const morgan = require('morgan');
-const connectDB = require('./config/db');
+const connectDB = require('./src/config/db');
 
 dotenv.config();
 
@@ -39,10 +39,10 @@ app.get('/ping', (req, res) => {
 });
 
 // Rutas de usuarios
-app.use('/users', require('./routes/users'));
+app.use('/users', require('./src/modules/users/user.route'));
 
 // Rutas de login
-app.use('/login', require('./routes/login'));
+app.use('/login', require('./src/modules/auth/auth.route'));
 
 // Manejo de rutas no encontradas
 app.use((req, res) => {

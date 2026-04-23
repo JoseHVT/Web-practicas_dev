@@ -16,7 +16,8 @@ export default function Navbar({ onLogout }) {
           Mi app
         </Typography>
         <Button color="inherit" onClick={() => navigate('/dashboard')}>Dashboard</Button>
-        <Button color="inherit" onClick={handleLogout}>logout</Button>
+        <Button color="inherit" onClick={() => navigate('/usuarios')}>Usuarios</Button>
+        <Button color="inherit" onClick={handleLogout}>Logout</Button>
       </Toolbar>
     </AppBar>
   );

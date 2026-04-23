@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './views/Login';
-import Dashboard from './views/Dashboard';
-import APITester from './views/APITester';
-import Navbar from './components/Navbar';
+import Login from './features/auth/pages/LoginPage';
+import Dashboard from './features/users/pages/DashboardPage';
+import UsersPage from './features/users/pages/UsersPage';
+import APITester from './shared/pages/APITester';
+import Navbar from './shared/components/Navbar';
 import { CssBaseline } from '@mui/material'; // estilos bas.
 
 function App() {
@@ -27,6 +28,12 @@ function App() {
           path="/dashboard"
           element={
             isAuthenticated ? <Dashboard /> : <Navigate to="/" />
+          }
+        />
+        <Route
+          path="/usuarios"
+          element={
+            isAuthenticated ? <UsersPage /> : <Navigate to="/" />
           }
         />
         <Route

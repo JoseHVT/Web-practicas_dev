@@ -1,4 +1,4 @@
-const LoginAccount = require('../models/LoginAccount');
+const LoginAccount = require('./auth.model');
 
 // POST - Login (Autenticación)
 exports.login = async (req, res) => {

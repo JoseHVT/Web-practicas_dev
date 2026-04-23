@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const loginController = require('../controllers/loginController');
+const loginController = require('./auth.controller');
 
 // Rutas CRUD para login
 router.post('/', loginController.login);
