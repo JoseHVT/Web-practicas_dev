@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const {
+  hashPassword,
+  isCryptoHash,
+  verifyPassword
+} = require('../../utils/passwordHash');
 
 const loginAccountSchema = new mongoose.Schema({
   username: {
@@ -29,23 +33,22 @@ const loginAccountSchema = new mongoose.Schema({
   }
 });
 
-// Hash de contraseña antes de guardar
-loginAccountSchema.pre('save', async function() {
+// Hash password before saving it in MongoDB.
+loginAccountSchema.pre('save', function() {
   if (!this.isModified('password')) {
     return;
   }
 
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-  } catch (error) {
-    throw error;
+  if (isCryptoHash(this.password)) {
+    return;
   }
+
+  this.password = hashPassword(this.password);
 });
 
-// Método para comparar contraseñas
-loginAccountSchema.methods.comparePassword = async function(passwordIngresada) {
-  return await bcrypt.compare(passwordIngresada, this.password);
+// Compare received password against the stored crypto hash.
+loginAccountSchema.methods.comparePassword = function(passwordIngresada) {
+  return verifyPassword(passwordIngresada, this.password);
 };
 
 module.exports = mongoose.model('LoginAccount', loginAccountSchema);

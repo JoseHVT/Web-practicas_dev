@@ -1,7 +1,23 @@
-import { useState, useEffect } from 'react';
-import { Container, Paper, TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tab, Tabs, Box, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  MenuItem,
+  Paper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 
 const API_URL = 'http://localhost:3000';
 
@@ -12,63 +28,71 @@ export default function APITester() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  // Form states
   const [newUser, setNewUser] = useState({ name: '', email: '', role: 'user' });
-  const [newAccount, setNewAccount] = useState({ username: '', email: '', password: '', confirmPassword: '' });
+  const [newAccount, setNewAccount] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
-  const [editingUser, setEditingUser] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
 
-  // Obtener usuarios
-  const fetchUsers = async () => {
+  const setResult = useCallback((type, message) => {
+    setError(type === 'error' ? message : '');
+    setSuccess(type === 'success' ? message : '');
+  }, []);
+
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
-    setError('');
+    setResult('', '');
+
     try {
       const response = await fetch(`${API_URL}/users`);
       const data = await response.json();
+
       if (data.success) {
         setUsers(data.data);
-        setSuccess('Usuarios cargados');
+        setResult('success', 'Usuarios cargados');
       } else {
-        setError(data.message);
+        setResult('error', data.message || 'No se pudieron cargar los usuarios');
       }
-    } catch (err) {
-      setError('Error conectando a la API. ¿Está MongoDB ejecutándose?');
+    } catch {
+      setResult('error', 'Error conectando a la API. Revisa MongoDB y el backend.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [setResult]);
 
-  // Obtener cuentas de login
-  const fetchAccounts = async () => {
+  const fetchAccounts = useCallback(async () => {
     setLoading(true);
-    setError('');
+    setResult('', '');
+
     try {
       const response = await fetch(`${API_URL}/login`);
       const data = await response.json();
+
       if (data.success) {
         setAccounts(data.data);
-        setSuccess('Cuentas cargadas');
+        setResult('success', 'Cuentas cargadas');
       } else {
-        setError(data.message);
+        setResult('error', data.message || 'No se pudieron cargar las cuentas');
       }
-    } catch (err) {
-      setError('Error conectando a la API');
+    } catch {
+      setResult('error', 'Error conectando a la API');
     } finally {
       setLoading(false);
     }
-  };
+  }, [setResult]);
 
-  // Crear usuario
   const handleCreateUser = async () => {
     if (!newUser.name || !newUser.email) {
-      setError('Completa todos los campos');
+      setResult('error', 'Completa nombre y email');
       return;
     }
 
     setLoading(true);
-    setError('');
+    setResult('', '');
+
     try {
       const response = await fetch(`${API_URL}/users`, {
         method: 'POST',
@@ -78,33 +102,33 @@ export default function APITester() {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('Usuario creado exitosamente');
         setNewUser({ name: '', email: '', role: 'user' });
-        fetchUsers();
+        setResult('success', 'Usuario creado');
+        await fetchUsers();
       } else {
-        setError(data.message);
+        setResult('error', data.message || 'No se pudo crear el usuario');
       }
-    } catch (err) {
-      setError('Error al crear usuario');
+    } catch {
+      setResult('error', 'Error al crear usuario');
     } finally {
       setLoading(false);
     }
   };
 
-  // Registrar cuenta
   const handleRegister = async () => {
     if (!newAccount.username || !newAccount.email || !newAccount.password || !newAccount.confirmPassword) {
-      setError('Completa todos los campos');
+      setResult('error', 'Completa todos los campos');
       return;
     }
 
     if (newAccount.password !== newAccount.confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setResult('error', 'Las contrasenas no coinciden');
       return;
     }
 
     setLoading(true);
-    setError('');
+    setResult('', '');
+
     try {
       const response = await fetch(`${API_URL}/login/register`, {
         method: 'POST',
@@ -114,28 +138,28 @@ export default function APITester() {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('Cuenta registrada exitosamente');
         setNewAccount({ username: '', email: '', password: '', confirmPassword: '' });
-        fetchAccounts();
+        setResult('success', 'Cuenta registrada');
+        await fetchAccounts();
       } else {
-        setError(data.message);
+        setResult('error', data.message || 'No se pudo registrar la cuenta');
       }
-    } catch (err) {
-      setError('Error al registrar cuenta');
+    } catch {
+      setResult('error', 'Error al registrar cuenta');
     } finally {
       setLoading(false);
     }
   };
 
-  // Login
   const handleLogin = async () => {
     if (!loginForm.username || !loginForm.password) {
-      setError('Completa usuario y contraseña');
+      setResult('error', 'Completa usuario y contrasena');
       return;
     }
 
     setLoading(true);
-    setError('');
+    setResult('', '');
+
     try {
       const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
@@ -145,57 +169,57 @@ export default function APITester() {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess(`Login exitoso! Token: ${data.token.substring(0, 30)}...`);
         setLoginForm({ username: '', password: '' });
+        setResult('success', `Login exitoso. Token: ${data.token.substring(0, 30)}...`);
       } else {
-        setError(data.message);
+        setResult('error', data.message || 'Credenciales invalidas');
       }
-    } catch (err) {
-      setError('Error al hacer login');
+    } catch {
+      setResult('error', 'Error al hacer login');
     } finally {
       setLoading(false);
     }
   };
 
-  // Eliminar usuario
   const handleDeleteUser = async (id) => {
-    if (!window.confirm('¿Eliminar este usuario?')) return;
+    if (!window.confirm('Eliminar este usuario?')) return;
 
     setLoading(true);
+
     try {
       const response = await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('Usuario eliminado');
-        fetchUsers();
+        setResult('success', 'Usuario eliminado');
+        await fetchUsers();
       } else {
-        setError(data.message);
+        setResult('error', data.message || 'No se pudo eliminar el usuario');
       }
-    } catch (err) {
-      setError('Error al eliminar usuario');
+    } catch {
+      setResult('error', 'Error al eliminar usuario');
     } finally {
       setLoading(false);
     }
   };
 
-  // Eliminar cuenta
   const handleDeleteAccount = async (id) => {
-    if (!window.confirm('¿Eliminar esta cuenta?')) return;
+    if (!window.confirm('Eliminar esta cuenta?')) return;
 
     setLoading(true);
+
     try {
       const response = await fetch(`${API_URL}/login/${id}`, { method: 'DELETE' });
       const data = await response.json();
 
       if (data.success) {
-        setSuccess('Cuenta eliminada');
-        fetchAccounts();
+        setResult('success', 'Cuenta eliminada');
+        await fetchAccounts();
       } else {
-        setError(data.message);
+        setResult('error', data.message || 'No se pudo eliminar la cuenta');
       }
-    } catch (err) {
-      setError('Error al eliminar cuenta');
+    } catch {
+      setResult('error', 'Error al eliminar cuenta');
     } finally {
       setLoading(false);
     }
@@ -204,31 +228,34 @@ export default function APITester() {
   useEffect(() => {
     if (activeTab === 0) fetchUsers();
     if (activeTab === 1) fetchAccounts();
-  }, [activeTab]);
+  }, [activeTab, fetchAccounts, fetchUsers]);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Paper sx={{ p: 3 }}>
-        <h1>🧪 Probador de REST-API MongoDB</h1>
+        <Typography variant="h4" sx={{ mb: 2 }}>
+          Probador de REST-API MongoDB
+        </Typography>
 
         {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
         {success && <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess('')}>{success}</Alert>}
 
-        <Tabs value={activeTab} onChange={(e, v) => setActiveTab(v)} sx={{ mb: 3 }}>
-          <Tab label="👥 Usuarios CRUD" />
-          <Tab label="🔐 Login & Registro" />
+        <Tabs value={activeTab} onChange={(event, value) => setActiveTab(value)} sx={{ mb: 3 }}>
+          <Tab label="Usuarios CRUD" />
+          <Tab label="Login y registro" />
         </Tabs>
 
-        {/* TAB 1: USUARIOS */}
         {activeTab === 0 && (
           <Box>
             <Paper sx={{ p: 3, mb: 3, bgcolor: '#f5f5f5' }}>
-              <h3>Crear Nuevo Usuario</h3>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Crear usuario
+              </Typography>
               <TextField
                 fullWidth
                 label="Nombre"
                 value={newUser.name}
-                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                onChange={(event) => setNewUser({ ...newUser, name: event.target.value })}
                 sx={{ mb: 2 }}
               />
               <TextField
@@ -236,7 +263,7 @@ export default function APITester() {
                 label="Email"
                 type="email"
                 value={newUser.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                onChange={(event) => setNewUser({ ...newUser, email: event.target.value })}
                 sx={{ mb: 2 }}
               />
               <TextField
@@ -244,19 +271,20 @@ export default function APITester() {
                 fullWidth
                 label="Rol"
                 value={newUser.role}
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                SelectProps={{ native: true }}
+                onChange={(event) => setNewUser({ ...newUser, role: event.target.value })}
                 sx={{ mb: 2 }}
               >
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+                <MenuItem value="user">User</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
               </TextField>
               <Button variant="contained" onClick={handleCreateUser} disabled={loading}>
-                {loading ? 'Creando...' : 'Crear Usuario'}
+                {loading ? 'Creando...' : 'Crear usuario'}
               </Button>
             </Paper>
 
-            <h3>Lista de Usuarios en MongoDB</h3>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              Usuarios en MongoDB
+            </Typography>
             <TableContainer>
               <Table>
                 <TableHead>
@@ -289,7 +317,7 @@ export default function APITester() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan="4" align="center">
-                        No hay usuarios en la BD
+                        No hay usuarios en la base de datos
                       </TableCell>
                     </TableRow>
                   )}
@@ -299,24 +327,25 @@ export default function APITester() {
           </Box>
         )}
 
-        {/* TAB 2: LOGIN */}
         {activeTab === 1 && (
           <Box>
             <Paper sx={{ p: 3, mb: 3, bgcolor: '#f5f5f5' }}>
-              <h3>🔓 Probar Login</h3>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Probar login
+              </Typography>
               <TextField
                 fullWidth
                 label="Usuario"
                 value={loginForm.username}
-                onChange={(e) => setLoginForm({ ...loginForm, username: e.target.value })}
+                onChange={(event) => setLoginForm({ ...loginForm, username: event.target.value })}
                 sx={{ mb: 2 }}
               />
               <TextField
                 fullWidth
-                label="Contraseña"
+                label="Contrasena"
                 type="password"
                 value={loginForm.password}
-                onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                onChange={(event) => setLoginForm({ ...loginForm, password: event.target.value })}
                 sx={{ mb: 2 }}
               />
               <Button variant="contained" color="success" onClick={handleLogin} disabled={loading}>
@@ -325,12 +354,14 @@ export default function APITester() {
             </Paper>
 
             <Paper sx={{ p: 3, mb: 3, bgcolor: '#f5f5f5' }}>
-              <h3>📝 Registrar Nueva Cuenta</h3>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Registrar cuenta
+              </Typography>
               <TextField
                 fullWidth
                 label="Usuario"
                 value={newAccount.username}
-                onChange={(e) => setNewAccount({ ...newAccount, username: e.target.value })}
+                onChange={(event) => setNewAccount({ ...newAccount, username: event.target.value })}
                 sx={{ mb: 2 }}
               />
               <TextField
@@ -338,31 +369,33 @@ export default function APITester() {
                 label="Email"
                 type="email"
                 value={newAccount.email}
-                onChange={(e) => setNewAccount({ ...newAccount, email: e.target.value })}
+                onChange={(event) => setNewAccount({ ...newAccount, email: event.target.value })}
                 sx={{ mb: 2 }}
               />
               <TextField
                 fullWidth
-                label="Contraseña"
+                label="Contrasena"
                 type="password"
                 value={newAccount.password}
-                onChange={(e) => setNewAccount({ ...newAccount, password: e.target.value })}
+                onChange={(event) => setNewAccount({ ...newAccount, password: event.target.value })}
                 sx={{ mb: 2 }}
               />
               <TextField
                 fullWidth
-                label="Confirmar Contraseña"
+                label="Confirmar contrasena"
                 type="password"
                 value={newAccount.confirmPassword}
-                onChange={(e) => setNewAccount({ ...newAccount, confirmPassword: e.target.value })}
+                onChange={(event) => setNewAccount({ ...newAccount, confirmPassword: event.target.value })}
                 sx={{ mb: 2 }}
               />
-              <Button variant="contained" color="primary" onClick={handleRegister} disabled={loading}>
+              <Button variant="contained" onClick={handleRegister} disabled={loading}>
                 {loading ? 'Registrando...' : 'Registrarse'}
               </Button>
             </Paper>
 
-            <h3>📋 Cuentas Registradas en MongoDB</h3>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+              Cuentas registradas
+            </Typography>
             <TableContainer>
               <Table>
                 <TableHead>
@@ -379,7 +412,7 @@ export default function APITester() {
                       <TableRow key={account.id}>
                         <TableCell>{account.username}</TableCell>
                         <TableCell>{account.email}</TableCell>
-                        <TableCell>{account.active ? '✓ Activo' : '✗ Inactivo'}</TableCell>
+                        <TableCell>{account.active ? 'Activo' : 'Inactivo'}</TableCell>
                         <TableCell>
                           <Button
                             size="small"
@@ -395,7 +428,7 @@ export default function APITester() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan="4" align="center">
-                        No hay cuentas en la BD
+                        No hay cuentas en la base de datos
                       </TableCell>
                     </TableRow>
                   )}
@@ -407,12 +440,14 @@ export default function APITester() {
       </Paper>
 
       <Paper sx={{ p: 3, mt: 4, bgcolor: '#fff3cd' }}>
-        <h3>⚠️ Instrucciones:</h3>
+        <Typography variant="h6" sx={{ mb: 1 }}>
+          Instrucciones
+        </Typography>
         <ol>
-          <li>Asegúrate que MongoDB está ejecutándose en <code>localhost:27017</code></li>
-          <li>Inicia la API: <code>cd api && npm run dev</code></li>
-          <li>Usa estas pestañas para probar los endpoints</li>
-          <li>Los datos se guardan PERMANENTEMENTE en MongoDB</li>
+          <li>Revisa que MongoDB este ejecutandose en localhost:27017.</li>
+          <li>Inicia la API con: cd backend y npm run dev.</li>
+          <li>Usa estas pestanas para probar los endpoints.</li>
+          <li>Los datos se guardan en MongoDB.</li>
         </ol>
       </Paper>
     </Container>

@@ -44,6 +44,9 @@ app.use('/users', require('./src/modules/users/user.route'));
 // Rutas de login
 app.use('/login', require('./src/modules/auth/auth.route'));
 
+// Rutas de dashboard
+app.use('/dashboard', require('./src/modules/dashboard/dashboard.route'));
+
 // Manejo de rutas no encontradas
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });

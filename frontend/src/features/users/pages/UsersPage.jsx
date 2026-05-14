@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Box, Typography, Button, Container, Snackbar, Alert } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import UserList from '../components/UserList';
@@ -13,13 +13,13 @@ export default function UsersPage() {
   // Notification state
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
-  const showNotification = (message, severity = 'success') => {
+  const showNotification = useCallback((message, severity = 'success') => {
     setNotification({ open: true, message, severity });
-  };
+  }, []);
 
-  const handleCloseNotification = () => setNotification({ ...notification, open: false });
+  const handleCloseNotification = () => setNotification((current) => ({ ...current, open: false }));
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getUsers();
@@ -34,11 +34,11 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showNotification]);
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [loadUsers]);
 
   const handleAddUser = async (userData) => {
     try {
@@ -70,7 +70,7 @@ export default function UsersPage() {
       } else {
         showNotification(data.message || 'Error al eliminar usuario', 'error');
       }
-    } catch (error) {
+    } catch {
       showNotification('Error al conectar con la API', 'error');
     } finally {
       setLoading(false);
