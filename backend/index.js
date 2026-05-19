@@ -9,72 +9,82 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
+// middlewares
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rutas iniciales
+// rutas iniciales
 app.get('/', (req, res) => {
   res.json({
-    message: 'Bienvenido a la REST-API',
+    message: 'bienvenido a la rest-api',
     status: 'active',
-    version: '2.0 - Con MongoDB'
+    version: '3.0 - jwt'
   });
 });
 
 app.get('/marco', (req, res) => {
   res.json({
-    message: 'Marco',
-    responses: ['Polo']
+    message: 'marco',
+    responses: ['polo']
   });
 });
 
 app.get('/ping', (req, res) => {
   res.json({
-    message: 'Pong',
+    message: 'pong',
     timestamp: new Date()
   });
 });
 
-// Rutas de usuarios
+// rutas de usuarios
 app.use('/users', require('./src/modules/users/user.route'));
 
-// Rutas de login
+// rutas de login
 app.use('/login', require('./src/modules/auth/auth.route'));
 
-// Rutas de dashboard
+// rutas de dashboard
 app.use('/dashboard', require('./src/modules/dashboard/dashboard.route'));
 
-// Manejo de rutas no encontradas
+// manejo de rutas no encontradas
 app.use((req, res) => {
-  res.status(404).json({ error: 'Ruta no encontrada' });
+  res.status(404).json({ error: 'ruta no encontrada' });
 });
 
-// Manejo de errores global
+// manejo de errores global
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: 'Error interno del servidor' });
+  res.status(500).json({ error: 'error interno del servidor' });
 });
 
-// Conectar a MongoDB e iniciar servidor
+// conectar a mongodb e iniciar servidor
 const startServer = async () => {
   const connected = await connectDB();
 
   if (!connected) {
-    console.log('\n⚠️  Iniciando servidor sin conexión a MongoDB');
-    console.log('   Los datos NO se guardarán\n');
+    console.log('\niniciando servidor sin conexion a mongodb');
+    console.log('los datos no se guardaran\n');
   }
 
-  app.listen(PORT, () => {
-    console.log(`✓ Servidor ejecutándose en http://localhost:${PORT}`);
-    console.log(`  Entorno: ${process.env.NODE_ENV}`);
+  const server = app.listen(PORT);
+
+  server.on('listening', () => {
+    console.log(`servidor ejecutandose en http://localhost:${PORT}`);
+    console.log(`entorno: ${process.env.NODE_ENV}`);
     if (connected) {
-      console.log('  Base de datos: Conectada\n');
+      console.log('base de datos: conectada\n');
     }
+  });
+
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`puerto ${PORT} en uso. cierra el proceso actual o cambia PORT en .env`);
+      return;
+    }
+
+    console.error('error al iniciar el servidor:', error.message);
   });
 };
 
 startServer();
-

@@ -6,12 +6,12 @@ const connectDB = async () => {
 
     await mongoose.connect(mongoURI);
 
-    console.log('✓ Conexión a MongoDB exitosa');
+    console.log('conexion a mongodb exitosa');
     return true;
   } catch (error) {
-    console.error('✗ Error conectando a MongoDB:', error.message);
-    console.log('\n⚠️  Asegúrate de que MongoDB está ejecutándose en localhost:27017');
-    console.log('   O configura MONGODB_URI en el archivo .env\n');
+    console.error('error conectando a mongodb:', error.message);
+    console.log('\nrevisa que mongodb este ejecutandose en localhost:27017');
+    console.log('o configura mongodb_uri en el archivo .env\n');
     return false;
   }
 };

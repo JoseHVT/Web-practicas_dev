@@ -5,23 +5,30 @@ import Dashboard from './features/users/pages/DashboardPage';
 import UsersPage from './features/users/pages/UsersPage';
 import APITester from './shared/pages/APITester';
 import Navbar from './shared/components/Navbar';
-import { CssBaseline } from '@mui/material'; // estilos bas.
+import { CssBaseline } from '@mui/material';
+import { clearAuthSession, loadAuthSession } from './shared/utils/authSession';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [session, setSession] = useState(loadAuthSession);
+  const isAuthenticated = Boolean(session?.token);
+  const isAdmin = session?.user?.role === 'admin';
+
+  const handleLogout = () => {
+    clearAuthSession();
+    setSession(null);
+  };
 
   return (
     <BrowserRouter>
       <CssBaseline />
 
-      {/* nav oculta por auth dinamico */}
-      {isAuthenticated && <Navbar onLogout={() => setIsAuthenticated(false)} />}
+      {isAuthenticated && <Navbar onLogout={handleLogout} isAdmin={isAdmin} />}
 
       <Routes>
         <Route
           path="/"
           element={
-            isAuthenticated ? <Navigate to="/dashboard" /> : <Login onLogin={() => setIsAuthenticated(true)} />
+            isAuthenticated ? <Navigate to="/dashboard" /> : <Login onLogin={setSession} />
           }
         />
         <Route
@@ -33,12 +40,18 @@ function App() {
         <Route
           path="/usuarios"
           element={
-            isAuthenticated ? <UsersPage /> : <Navigate to="/" />
+            isAuthenticated ? <UsersPage isAdmin={isAdmin} /> : <Navigate to="/" />
           }
         />
         <Route
           path="/test-api"
-          element={<APITester />}
+          element={
+            !isAuthenticated
+              ? <Navigate to="/" />
+              : isAdmin
+                ? <APITester />
+                : <Navigate to="/dashboard" />
+          }
         />
       </Routes>
     </BrowserRouter>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem } from '@mui/material';
 
 export default function UserForm({ open, onClose, onSubmit, loading }) {
-  const [formData, setFormData] = useState({ name: '', email: '', role: 'user' });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user' });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -11,17 +11,17 @@ export default function UserForm({ open, onClose, onSubmit, loading }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
-    setFormData({ name: '', email: '', role: 'user' }); // reset after submit
+    setFormData({ name: '', email: '', password: '', role: 'user' });
   };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Agregar Nuevo Usuario</DialogTitle>
+      <DialogTitle>agregar nuevo usuario</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
           <TextField
             autoFocus
-            label="Nombre"
+            label="nombre"
             name="name"
             value={formData.name}
             onChange={handleChange}
@@ -29,7 +29,7 @@ export default function UserForm({ open, onClose, onSubmit, loading }) {
             required
           />
           <TextField
-            label="Email"
+            label="email"
             name="email"
             type="email"
             value={formData.email}
@@ -38,22 +38,31 @@ export default function UserForm({ open, onClose, onSubmit, loading }) {
             required
           />
           <TextField
+            label="contrasena"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+          <TextField
             select
-            label="Rol"
+            label="rol"
             name="role"
             value={formData.role}
             onChange={handleChange}
             fullWidth
             required
           >
-            <MenuItem value="user">Usuario</MenuItem>
-            <MenuItem value="admin">Administrador</MenuItem>
+            <MenuItem value="user">usuario</MenuItem>
+            <MenuItem value="admin">administrador</MenuItem>
           </TextField>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} color="inherit">Cancelar</Button>
+          <Button onClick={onClose} color="inherit">cancelar</Button>
           <Button type="submit" variant="contained" color="primary" disabled={loading}>
-            {loading ? 'Guardando...' : 'Guardar'}
+            {loading ? 'guardando...' : 'guardar'}
           </Button>
         </DialogActions>
       </form>

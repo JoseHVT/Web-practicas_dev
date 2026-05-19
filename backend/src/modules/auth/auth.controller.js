@@ -1,138 +1,219 @@
 const LoginAccount = require('./auth.model');
+const User = require('../users/user.model');
+const { createToken } = require('../../utils/jwt');
 
-// POST - Login (Autenticación)
+const normalizeUsername = (value) => (
+  typeof value === 'string' ? value.trim() : value
+);
+
+const normalizeEmail = (value) => (
+  typeof value === 'string' ? value.trim().toLowerCase() : value
+);
+
+const isDuplicateKeyError = (error) => error?.code === 11000;
+
+const isValidPassword = (password) => (
+  typeof password === 'string' &&
+  password.length >= 6 &&
+  !/\s/.test(password)
+);
+
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
+    const normalizedUsername = normalizeUsername(username);
 
-    if (!username || !password) {
+    if (!normalizedUsername || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Usuario y contraseña son requeridos'
+        message: 'usuario y contrasena son requeridos'
       });
     }
 
-    const account = await LoginAccount.findOne({ username, active: true });
+    if (!isValidPassword(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'contrasena invalida'
+      });
+    }
+
+    const account = await LoginAccount.findOne({
+      username: normalizedUsername,
+      active: true
+    }).populate('user', 'role');
 
     if (!account) {
       return res.status(401).json({
         success: false,
-        message: 'Credenciales inválidas'
+        message: 'credenciales invalidas'
       });
     }
 
-    // Comparar contraseña
     const isPasswordValid = await account.comparePassword(password);
 
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Credenciales inválidas'
+        message: 'credenciales invalidas'
       });
     }
 
-    res.json({
+    const token = createToken(account);
+
+    return res.json({
       success: true,
-      message: 'Login exitoso',
+      message: 'login exitoso',
       data: {
         id: account._id,
+        userId: account.user?._id || account.user,
         username: account.username,
-        email: account.email
+        email: account.email,
+        role: account.user?.role || 'user'
       },
-      token: `token_${Date.now()}_${account._id}`
+      token
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: 'Error en el login',
+      message: 'error en el login',
       error: error.message
     });
   }
 };
 
-// POST - Registro
 exports.register = async (req, res) => {
   try {
     const { username, email, password, confirmPassword } = req.body;
+    const normalizedUsername = normalizeUsername(username);
+    const normalizedEmail = normalizeEmail(email);
 
-    if (!username || !email || !password || !confirmPassword) {
+    if (!normalizedUsername || !normalizedEmail || !password || !confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Todos los campos son requeridos'
+        message: 'todos los campos son requeridos'
       });
     }
 
     if (password !== confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Las contraseñas no coinciden'
+        message: 'las contrasenas no coinciden'
       });
     }
 
-    // Verificar si el usuario o email ya existe
-    const existingUser = await LoginAccount.findOne({
-      $or: [{ username }, { email }]
+    if (!isValidPassword(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'contrasena invalida'
+      });
+    }
+
+    const existingAccount = await LoginAccount.findOne({
+      $or: [{ username: normalizedUsername }, { email: normalizedEmail }]
     });
 
-    if (existingUser) {
+    if (existingAccount) {
       return res.status(409).json({
         success: false,
-        message: 'El usuario o email ya existe'
+        message: 'el usuario o email ya existe'
       });
+    }
+
+    let user = await User.findOne({ email: normalizedEmail });
+    let createdUser = false;
+
+    if (!user) {
+      try {
+        user = new User({
+          name: normalizedUsername,
+          email: normalizedEmail,
+          role: 'user'
+        });
+
+        await user.save();
+        createdUser = true;
+      } catch (error) {
+        if (!isDuplicateKeyError(error)) {
+          throw error;
+        }
+
+        user = await User.findOne({ email: normalizedEmail });
+
+        if (!user) {
+          throw error;
+        }
+      }
     }
 
     const newAccount = new LoginAccount({
-      username,
-      email,
+      user: user._id,
+      username: normalizedUsername,
+      email: normalizedEmail,
       password
     });
 
-    await newAccount.save();
+    try {
+      await newAccount.save();
+    } catch (error) {
+      if (createdUser) {
+        await User.findByIdAndDelete(user._id);
+      }
 
-    res.status(201).json({
+      if (isDuplicateKeyError(error)) {
+        return res.status(409).json({
+          success: false,
+          message: 'el usuario o email ya existe'
+        });
+      }
+
+      throw error;
+    }
+
+    return res.status(201).json({
       success: true,
-      message: 'Registro exitoso',
+      message: 'registro exitoso',
       data: {
         id: newAccount._id,
+        userId: user._id,
         username: newAccount.username,
         email: newAccount.email
       }
     });
   } catch (error) {
-    console.error('❌ Error en registro:', error);
-    res.status(500).json({
+    console.error('error en registro:', error);
+    return res.status(500).json({
       success: false,
-      message: 'Error en el registro',
+      message: 'error en el registro',
       error: error.message
     });
   }
 };
 
-// GET - Obtener todas las cuentas de login
 exports.getLoginAccounts = async (req, res) => {
   try {
     const accounts = await LoginAccount.find({}, '-password');
-    res.json({
+
+    return res.json({
       success: true,
-      data: accounts.map(acc => ({
-        id: acc._id,
-        username: acc.username,
-        email: acc.email,
-        active: acc.active,
-        createdAt: acc.createdAt
+      data: accounts.map((account) => ({
+        id: account._id,
+        userId: account.user,
+        username: account.username,
+        email: account.email,
+        active: account.active,
+        createdAt: account.createdAt
       })),
       count: accounts.length
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: 'Error al obtener cuentas',
+      message: 'error al obtener cuentas',
       error: error.message
     });
   }
 };
 
-// DELETE - Eliminar cuenta de login
 exports.deleteLoginAccount = async (req, res) => {
   try {
     const { id } = req.params;
@@ -141,69 +222,91 @@ exports.deleteLoginAccount = async (req, res) => {
     if (!account) {
       return res.status(404).json({
         success: false,
-        message: 'Cuenta no encontrada'
+        message: 'cuenta no encontrada'
       });
     }
 
-    res.json({
+    const userId = account.user?._id || account.user;
+
+    if (userId) {
+      await User.findByIdAndDelete(userId);
+    }
+
+    return res.json({
       success: true,
-      message: 'Cuenta eliminada exitosamente',
+      message: 'cuenta eliminada exitosamente',
       data: {
         id: account._id,
         username: account.username
       }
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: 'Error al eliminar cuenta',
+      message: 'error al eliminar cuenta',
       error: error.message
     });
   }
 };
 
-// PUT - Actualizar contraseña
 exports.updatePassword = async (req, res) => {
   try {
     const { username, oldPassword, newPassword } = req.body;
+    const normalizedUsername = normalizeUsername(username);
 
-    if (!username || !oldPassword || !newPassword) {
+    if (!normalizedUsername || !oldPassword || !newPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Todos los campos son requeridos'
+        message: 'todos los campos son requeridos'
       });
     }
 
-    const account = await LoginAccount.findOne({ username });
+    const account = await LoginAccount.findOne({
+      username: normalizedUsername,
+      active: true
+    });
 
     if (!account) {
       return res.status(404).json({
         success: false,
-        message: 'Usuario no encontrado'
+        message: 'usuario no encontrado'
       });
     }
 
-    // Comparar contraseña antigua
+    if (req.account?._id.toString() !== account._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'no puedes cambiar la contrasena de otra cuenta'
+      });
+    }
+
+    if (!isValidPassword(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message: 'contrasena invalida'
+      });
+    }
+
     const isPasswordValid = await account.comparePassword(oldPassword);
 
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        message: 'Contraseña antigua incorrecta'
+        message: 'contrasena anterior incorrecta'
       });
     }
 
     account.password = newPassword;
     await account.save();
 
-    res.json({
+    return res.json({
       success: true,
-      message: 'Contraseña actualizada exitosamente'
+      message: 'contrasena actualizada exitosamente'
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: 'Error al actualizar contraseña',
+      message: 'error al actualizar contrasena',
       error: error.message
     });
   }

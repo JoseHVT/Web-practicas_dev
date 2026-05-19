@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('./user.controller');
+const { authenticateToken, requireAdmin } = require('../../middlewares/auth.middleware');
 
-// Rutas CRUD para usuarios
+router.use(authenticateToken);
+
 router.get('/', userController.getUsers);
 router.get('/:id', userController.getUserById);
-router.post('/', userController.createUser);
-router.put('/:id', userController.updateUser);
-router.delete('/:id', userController.deleteUser);
+router.post('/', requireAdmin, userController.createUser);
+router.put('/:id', requireAdmin, userController.updateUser);
+router.delete('/:id', requireAdmin, userController.deleteUser);
 
 module.exports = router;

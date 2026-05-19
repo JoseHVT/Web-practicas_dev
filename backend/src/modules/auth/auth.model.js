@@ -6,6 +6,10 @@ const {
 } = require('../../utils/passwordHash');
 
 const loginAccountSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   username: {
     type: String,
     required: true,
@@ -33,7 +37,7 @@ const loginAccountSchema = new mongoose.Schema({
   }
 });
 
-// Hash password before saving it in MongoDB.
+// hash password before saving it in mongodb
 loginAccountSchema.pre('save', function() {
   if (!this.isModified('password')) {
     return;
@@ -46,7 +50,7 @@ loginAccountSchema.pre('save', function() {
   this.password = hashPassword(this.password);
 });
 
-// Compare received password against the stored crypto hash.
+// compare received password against the stored crypto hash
 loginAccountSchema.methods.comparePassword = function(passwordIngresada) {
   return verifyPassword(passwordIngresada, this.password);
 };

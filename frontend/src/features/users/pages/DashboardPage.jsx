@@ -4,6 +4,12 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:3000/dashboard';
 
+const getAuthConfig = () => ({
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`
+  }
+});
+
 const getDefaultRange = () => {
   const end = new Date();
   const start = new Date();
@@ -30,8 +36,9 @@ export default function Dashboard() {
         setError('');
 
         const [kpisResponse, registrationsResponse] = await Promise.all([
-          axios.get(`${API_URL}/kpis`),
+          axios.get(`${API_URL}/kpis`, getAuthConfig()),
           axios.get(`${API_URL}/charts/registrations`, {
+            ...getAuthConfig(),
             params: { startDate, endDate }
           })
         ]);
@@ -56,7 +63,7 @@ export default function Dashboard() {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 700 }}>
-        Dashboard
+        dashboard
       </Typography>
 
       {loading && (
@@ -88,7 +95,7 @@ export default function Dashboard() {
             <Card>
               <CardContent>
                 <Typography color="text.secondary" variant="body2">
-                  Total usuarios
+                  total usuarios
                 </Typography>
                 <Typography variant="h4">{kpis.totalUsers}</Typography>
               </CardContent>
@@ -97,7 +104,7 @@ export default function Dashboard() {
             <Card>
               <CardContent>
                 <Typography color="text.secondary" variant="body2">
-                  Admins activos
+                  admins activos
                 </Typography>
                 <Typography variant="h4">{kpis.activeAdmins}</Typography>
               </CardContent>
@@ -106,7 +113,7 @@ export default function Dashboard() {
             <Card>
               <CardContent>
                 <Typography color="text.secondary" variant="body2">
-                  Nuevos este mes
+                  nuevos este mes
                 </Typography>
                 <Typography variant="h4">{kpis.newUsersThisMonth}</Typography>
               </CardContent>
@@ -115,7 +122,7 @@ export default function Dashboard() {
             <Card>
               <CardContent>
                 <Typography color="text.secondary" variant="body2">
-                  Crecimiento mensual
+                  crecimiento mensual
                 </Typography>
                 <Typography variant="h4">{kpis.monthlyGrowthPercentage}%</Typography>
               </CardContent>
@@ -125,12 +132,12 @@ export default function Dashboard() {
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2 }}>
-                Registros ultimos 30 dias
+                registros ultimos 30 dias
               </Typography>
 
               {registrations.length === 0 ? (
                 <Typography color="text.secondary">
-                  No hay registros en el rango consultado.
+                  no hay registros en el rango consultado.
                 </Typography>
               ) : (
                 <Box sx={{ display: 'grid', gap: 1 }}>

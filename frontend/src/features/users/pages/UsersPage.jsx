@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Button, Container, Snackbar, Alert } from '@mui/material';
+import { Alert, Box, Button, Container, Snackbar, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import UserList from '../components/UserList';
 import UserForm from '../components/UserForm';
 import { getUsers, createUser, deleteUser } from '../services/userService';
 
-export default function UsersPage() {
+export default function UsersPage({ isAdmin }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  // Notification state
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
   const showNotification = useCallback((message, severity = 'success') => {
@@ -23,13 +21,14 @@ export default function UsersPage() {
     try {
       setLoading(true);
       const data = await getUsers();
+
       if (data.success) {
         setUsers(data.data);
       } else {
-        showNotification(data.message || 'Error al cargar usuarios', 'error');
+        showNotification(data.message || 'error al cargar usuarios', 'error');
       }
     } catch (error) {
-      showNotification('Error de conexión con la API', 'error');
+      showNotification('error de conexion con la api', 'error');
       console.error(error);
     } finally {
       setLoading(false);
@@ -44,34 +43,36 @@ export default function UsersPage() {
     try {
       setLoading(true);
       const data = await createUser(userData);
+
       if (data.success) {
-        showNotification('Usuario creado correctamente');
+        showNotification('usuario creado correctamente');
         setIsModalOpen(false);
-        loadUsers(); // Refresh table
+        loadUsers();
       } else {
-        showNotification(data.message || 'Error al crear usuario', 'error');
+        showNotification(data.message || 'error al crear usuario', 'error');
       }
     } catch (error) {
-      showNotification(error.response?.data?.message || 'Error de servidor', 'error');
+      showNotification(error.response?.data?.message || 'error de servidor', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteUser = async (id) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este usuario?')) return;
-    
+    if (!window.confirm('eliminar este usuario?')) return;
+
     try {
       setLoading(true);
       const data = await deleteUser(id);
+
       if (data.success) {
-        showNotification('Usuario eliminado');
-        loadUsers(); // Refresh table
+        showNotification('usuario eliminado');
+        loadUsers();
       } else {
-        showNotification(data.message || 'Error al eliminar usuario', 'error');
+        showNotification(data.message || 'error al eliminar usuario', 'error');
       }
     } catch {
-      showNotification('Error al conectar con la API', 'error');
+      showNotification('error al conectar con la api', 'error');
     } finally {
       setLoading(false);
     }
@@ -80,27 +81,38 @@ export default function UsersPage() {
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">
-          Gestión de Usuarios
-        </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          startIcon={<AddIcon />}
-          onClick={() => setIsModalOpen(true)}
-        >
-          Agregar Usuario
-        </Button>
+        <Box>
+          <Typography variant="h4" component="h1">
+            gestion de usuarios
+          </Typography>
+          {!isAdmin && (
+            <Typography color="text.secondary">
+              modo lectura. solo los administradores pueden crear o eliminar usuarios.
+            </Typography>
+          )}
+        </Box>
+        {isAdmin && (
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => setIsModalOpen(true)}
+          >
+            agregar usuario
+          </Button>
+        )}
       </Box>
 
-      <UserList users={users} onDelete={handleDeleteUser} />
+      <UserList users={users} onDelete={handleDeleteUser} canManage={isAdmin} />
 
-      <UserForm 
-        open={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSubmit={handleAddUser}
-        loading={loading}
-      />
+      {isAdmin && (
+        <UserForm
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleAddUser}
+          loading={loading}
+        />
+      )}
 
       <Snackbar open={notification.open} autoHideDuration={6000} onClose={handleCloseNotification}>
         <Alert onClose={handleCloseNotification} severity={notification.severity} sx={{ width: '100%' }}>
