@@ -34,6 +34,7 @@ MONGODB_URI=mongodb://localhost:27017/login_db
 PASSWORD_PEPPER=cambia_este_valor
 JWT_SECRET=cambia_este_valor
 JWT_EXPIRES_IN=1h
+ALLOWED_ORIGIN=http://localhost:5173
 ```
 
 ## hash de contrasenas
@@ -115,3 +116,9 @@ npm run update-password-hashes
 ```
 
 si una contrasena esta en texto plano, el script la convierte a hash. si ya tiene hash con otro metodo, se requiere conocer la contrasena original y pasarla en `PASSWORD_UPDATES`.
+
+## notas de produccion
+
+- en `production`, `MONGODB_URI`, `JWT_SECRET`, `PASSWORD_PEPPER` y `ALLOWED_ORIGIN` son obligatorios.
+- cors acepta solo los origenes definidos en `ALLOWED_ORIGIN`.
+- la cuenta demo admin se debe sembrar manualmente y no de forma automatica en produccion.

@@ -1,25 +1,21 @@
-import axios from 'axios';
-import { getAuthToken } from '../../../shared/utils/authSession';
-
-const API_URL = 'http://localhost:3000/users';
-
-const getAuthConfig = () => ({
-  headers: {
-    Authorization: `Bearer ${getAuthToken()}`
-  }
-});
+import apiClient from '../../../shared/services/apiClient';
 
 export const getUsers = async () => {
-  const response = await axios.get(API_URL, getAuthConfig());
+  const response = await apiClient.get('/users');
   return response.data;
 };
 
 export const createUser = async (userData) => {
-  const response = await axios.post(API_URL, userData, getAuthConfig());
+  const response = await apiClient.post('/users', userData);
+  return response.data;
+};
+
+export const updateUser = async (id, userData) => {
+  const response = await apiClient.put(`/users/${id}`, userData);
   return response.data;
 };
 
 export const deleteUser = async (id) => {
-  const response = await axios.delete(`${API_URL}/${id}`, getAuthConfig());
+  const response = await apiClient.delete(`/users/${id}`);
   return response.data;
 };

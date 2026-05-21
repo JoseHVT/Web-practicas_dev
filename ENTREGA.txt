@@ -25,6 +25,18 @@ frontend: http://localhost:5173
 uso normal: http://localhost:5173/
 prueba visual admin: http://localhost:5173/test-api
 
+variables principales:
+
+backend:
+- MONGODB_URI
+- JWT_SECRET
+- JWT_EXPIRES_IN
+- PASSWORD_PEPPER
+- ALLOWED_ORIGIN
+
+frontend:
+- VITE_API_URL
+
 cuenta demo admin:
 usuario: tequi
 email: t@gmail.com
@@ -83,7 +95,7 @@ Authorization: Bearer <token>
 separacion entre sistema y pruebas:
 
 - `/` y `/dashboard` son el uso normal del sistema.
-- `/usuarios` permite consulta a usuarios autenticados y administracion solo para admins.
+- `/usuarios` permite consulta a usuarios autenticados y crud completo solo para admins.
 - `/test-api` es un banco de pruebas tecnico solo para admins.
 
 actualizar contrasenas existentes:

@@ -1,9 +1,7 @@
 const jwt = require('jsonwebtoken');
+const { getJwtSecret } = require('../config/env');
 
-const DEFAULT_JWT_SECRET = 'dev_jwt_secret_change_me';
 const DEFAULT_EXPIRES_IN = '1h';
-
-const getJwtSecret = () => process.env.JWT_SECRET || DEFAULT_JWT_SECRET;
 
 const getJwtOptions = () => ({
   expiresIn: process.env.JWT_EXPIRES_IN || DEFAULT_EXPIRES_IN

@@ -9,8 +9,8 @@ import {
   TextField,
   Typography
 } from '@mui/material';
+import { apiBaseUrl } from '../services/apiClient';
 
-const API_URL = 'http://localhost:3000';
 const TEST_TOKEN_KEY = 'apiTestToken';
 
 const createTestAccount = () => {
@@ -42,7 +42,7 @@ export default function APITester() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}${path}`, options);
+      const response = await fetch(`${apiBaseUrl}${path}`, options);
       const body = await response.json();
       showResult(label, response, body);
       return { response, body };

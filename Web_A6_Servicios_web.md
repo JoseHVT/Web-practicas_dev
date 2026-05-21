@@ -64,4 +64,6 @@ Authorization: Bearer <token>
 - middleware de rol para rutas de administracion.
 - rutas publicas separadas de rutas protegidas.
 - separacion entre uso normal y banco de pruebas.
+- frontend desacoplado de `localhost` mediante `VITE_API_URL`.
+- cors controlado por `ALLOWED_ORIGIN`.
 - el frontend guarda el token y lo envia en el header authorization.

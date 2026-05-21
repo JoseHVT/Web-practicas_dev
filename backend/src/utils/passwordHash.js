@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { getPasswordPepper } = require('../config/env');
 
 const HASH_ALGORITHM = 'scrypt';
 const KEY_LENGTH = 64;
@@ -9,14 +10,12 @@ const SCRYPT_OPTIONS = Object.freeze({
   p: 1
 });
 
-const PASSWORD_PEPPER = process.env.PASSWORD_PEPPER || 'web-practicas-dev-pepper';
-
 const passwordWithPepper = (password) => {
   if (typeof password !== 'string' || password.length === 0) {
     throw new Error('Password must be a non-empty string');
   }
 
-  return `${password}:${PASSWORD_PEPPER}`;
+  return `${password}:${getPasswordPepper()}`;
 };
 
 const createSalt = () => crypto.randomBytes(SALT_LENGTH).toString('hex');

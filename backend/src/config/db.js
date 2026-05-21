@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
+const { getMongoUri } = require('./env');
 
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/login_db';
+    const mongoURI = getMongoUri();
 
     await mongoose.connect(mongoURI);
 

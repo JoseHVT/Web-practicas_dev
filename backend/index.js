@@ -3,14 +3,37 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const morgan = require('morgan');
 const connectDB = require('./src/config/db');
+const {
+  getAllowedOrigins,
+  isProduction,
+  validateRuntimeConfig
+} = require('./src/config/env');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const allowedOrigins = (() => {
+  try {
+    return getAllowedOrigins();
+  } catch {
+    return [];
+  }
+})();
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('origen no permitido por cors'));
+  }
+};
 
 // middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -54,15 +77,33 @@ app.use((req, res) => {
 
 // manejo de errores global
 app.use((err, req, res, next) => {
+  if (err.message === 'origen no permitido por cors') {
+    return res.status(403).json({ error: err.message });
+  }
+
   console.error(err.stack);
   res.status(500).json({ error: 'error interno del servidor' });
 });
 
 // conectar a mongodb e iniciar servidor
 const startServer = async () => {
+  try {
+    validateRuntimeConfig();
+  } catch (error) {
+    console.error(`configuracion invalida: ${error.message}`);
+    process.exitCode = 1;
+    return;
+  }
+
   const connected = await connectDB();
 
   if (!connected) {
+    if (isProduction) {
+      console.error('en produccion la api requiere conexion valida a mongodb');
+      process.exitCode = 1;
+      return;
+    }
+
     console.log('\niniciando servidor sin conexion a mongodb');
     console.log('los datos no se guardaran\n');
   }

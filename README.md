@@ -11,6 +11,7 @@ https://github.com/JoseHVT/Web-practicas_dev.git
 - `frontend`: cliente react con vite y material ui.
 - `ENTREGA.txt`: archivo de entrega con el link del repositorio e instrucciones basicas.
 - `Web_A6_Servicios_web.md`: especificacion de servicios web.
+- `DEPLOY_RAILWAY.md`: guia breve para publicar backend y frontend.
 
 ## requisitos
 
@@ -47,6 +48,7 @@ MONGODB_URI=mongodb://localhost:27017/login_db
 PASSWORD_PEPPER=cambia_este_valor
 JWT_SECRET=cambia_este_valor
 JWT_EXPIRES_IN=1h
+ALLOWED_ORIGIN=http://localhost:5173
 ```
 
 ## frontend
@@ -58,6 +60,12 @@ npm run dev
 ```
 
 el frontend usa `http://localhost:5173`.
+
+variable recomendada:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
 
 ## seguridad de contrasenas
 
@@ -105,7 +113,7 @@ en frontend:
 
 - `/` es el acceso normal al sistema
 - `/dashboard` es la vista principal tras login
-- `/usuarios` permite consulta a usuarios autenticados y administracion para admins
+- `/usuarios` permite consulta para usuarios autenticados y crud completo para admins
 - `/test-api` es un banco de pruebas tecnico solo para admins
 
 ## validacion

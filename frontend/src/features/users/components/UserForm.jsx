@@ -1,8 +1,22 @@
 import { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, MenuItem } from '@mui/material';
 
-export default function UserForm({ open, onClose, onSubmit, loading }) {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'user' });
+const buildInitialFormData = (user, mode) => ({
+  name: user?.name || '',
+  email: user?.email || '',
+  password: mode === 'create' ? '' : undefined,
+  role: user?.role || 'user'
+});
+
+export default function UserForm({
+  open,
+  onClose,
+  onSubmit,
+  loading,
+  mode = 'create',
+  initialValues = null
+}) {
+  const [formData, setFormData] = useState(buildInitialFormData(initialValues, mode));
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -11,12 +25,11 @@ export default function UserForm({ open, onClose, onSubmit, loading }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(formData);
-    setFormData({ name: '', email: '', password: '', role: 'user' });
   };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>agregar nuevo usuario</DialogTitle>
+      <DialogTitle>{mode === 'edit' ? 'editar usuario' : 'agregar nuevo usuario'}</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
           <TextField
@@ -37,15 +50,17 @@ export default function UserForm({ open, onClose, onSubmit, loading }) {
             fullWidth
             required
           />
-          <TextField
-            label="contrasena"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            fullWidth
-            required
-          />
+          {mode === 'create' && (
+            <TextField
+              label="contrasena"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+          )}
           <TextField
             select
             label="rol"
@@ -62,7 +77,7 @@ export default function UserForm({ open, onClose, onSubmit, loading }) {
         <DialogActions>
           <Button onClick={onClose} color="inherit">cancelar</Button>
           <Button type="submit" variant="contained" color="primary" disabled={loading}>
-            {loading ? 'guardando...' : 'guardar'}
+            {loading ? 'guardando...' : mode === 'edit' ? 'guardar cambios' : 'guardar'}
           </Button>
         </DialogActions>
       </form>

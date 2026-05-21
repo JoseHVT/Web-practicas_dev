@@ -1,14 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Alert, Box, Card, CardContent, CircularProgress, Typography } from '@mui/material';
-import axios from 'axios';
-
-const API_URL = 'http://localhost:3000/dashboard';
-
-const getAuthConfig = () => ({
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`
-  }
-});
+import apiClient from '../../../shared/services/apiClient';
+import { getApiErrorMessage } from '../../../shared/utils/apiErrors';
 
 const getDefaultRange = () => {
   const end = new Date();
@@ -36,9 +29,8 @@ export default function Dashboard() {
         setError('');
 
         const [kpisResponse, registrationsResponse] = await Promise.all([
-          axios.get(`${API_URL}/kpis`, getAuthConfig()),
-          axios.get(`${API_URL}/charts/registrations`, {
-            ...getAuthConfig(),
+          apiClient.get('/dashboard/kpis'),
+          apiClient.get('/dashboard/charts/registrations', {
             params: { startDate, endDate }
           })
         ]);
@@ -46,7 +38,7 @@ export default function Dashboard() {
         setKpis(kpisResponse.data);
         setRegistrations(registrationsResponse.data || []);
       } catch (requestError) {
-        setError(requestError.response?.data?.message || 'No se pudo cargar el dashboard');
+        setError(getApiErrorMessage(requestError, 'no se pudo cargar el dashboard'));
       } finally {
         setLoading(false);
       }

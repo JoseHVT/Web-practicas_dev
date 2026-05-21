@@ -3,12 +3,16 @@ import { Alert, Box, Button, Container, Snackbar, Typography } from '@mui/materi
 import AddIcon from '@mui/icons-material/Add';
 import UserList from '../components/UserList';
 import UserForm from '../components/UserForm';
-import { getUsers, createUser, deleteUser } from '../services/userService';
+import { createUser, deleteUser, getUsers, updateUser } from '../services/userService';
+import { getApiErrorMessage } from '../../../shared/utils/apiErrors';
+import { clearAuthSession, getAuthUser, updateAuthUser } from '../../../shared/utils/authSession';
 
 export default function UsersPage({ isAdmin }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formMode, setFormMode] = useState('create');
+  const [selectedUser, setSelectedUser] = useState(null);
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
 
   const showNotification = useCallback((message, severity = 'success') => {
@@ -16,6 +20,11 @@ export default function UsersPage({ isAdmin }) {
   }, []);
 
   const handleCloseNotification = () => setNotification((current) => ({ ...current, open: false }));
+  const closeForm = () => {
+    setIsModalOpen(false);
+    setSelectedUser(null);
+    setFormMode('create');
+  };
 
   const loadUsers = useCallback(async () => {
     try {
@@ -28,7 +37,7 @@ export default function UsersPage({ isAdmin }) {
         showNotification(data.message || 'error al cargar usuarios', 'error');
       }
     } catch (error) {
-      showNotification('error de conexion con la api', 'error');
+      showNotification(getApiErrorMessage(error, 'error de conexion con la api'), 'error');
       console.error(error);
     } finally {
       setLoading(false);
@@ -39,23 +48,83 @@ export default function UsersPage({ isAdmin }) {
     loadUsers();
   }, [loadUsers]);
 
-  const handleAddUser = async (userData) => {
+  const syncCurrentSessionIfNeeded = (userData) => {
+    const currentUser = getAuthUser();
+
+    if (!currentUser || currentUser.userId !== userData._id) {
+      return;
+    }
+
+    updateAuthUser({
+      ...currentUser,
+      username: userData.name,
+      email: userData.email,
+      role: userData.role
+    });
+  };
+
+  const handleCreateUser = async (userData) => {
     try {
       setLoading(true);
       const data = await createUser(userData);
 
       if (data.success) {
         showNotification('usuario creado correctamente');
-        setIsModalOpen(false);
-        loadUsers();
+        closeForm();
+        await loadUsers();
       } else {
         showNotification(data.message || 'error al crear usuario', 'error');
       }
     } catch (error) {
-      showNotification(error.response?.data?.message || 'error de servidor', 'error');
+      showNotification(getApiErrorMessage(error, 'error de servidor'), 'error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditUser = async (userData) => {
+    if (!selectedUser) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const data = await updateUser(selectedUser._id, userData);
+
+      if (data.success) {
+        syncCurrentSessionIfNeeded(data.data);
+        showNotification('usuario actualizado correctamente');
+        closeForm();
+        await loadUsers();
+      } else {
+        showNotification(data.message || 'error al actualizar usuario', 'error');
+      }
+    } catch (error) {
+      showNotification(getApiErrorMessage(error, 'error de servidor'), 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitUser = async (userData) => {
+    if (formMode === 'edit') {
+      await handleEditUser(userData);
+      return;
+    }
+
+    await handleCreateUser(userData);
+  };
+
+  const openCreateModal = () => {
+    setFormMode('create');
+    setSelectedUser(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (user) => {
+    setFormMode('edit');
+    setSelectedUser(user);
+    setIsModalOpen(true);
   };
 
   const handleDeleteUser = async (id) => {
@@ -66,13 +135,21 @@ export default function UsersPage({ isAdmin }) {
       const data = await deleteUser(id);
 
       if (data.success) {
+        const currentUser = getAuthUser();
+
+        if (currentUser?.userId === id) {
+          clearAuthSession();
+          window.location.assign('/');
+          return;
+        }
+
         showNotification('usuario eliminado');
-        loadUsers();
+        await loadUsers();
       } else {
         showNotification(data.message || 'error al eliminar usuario', 'error');
       }
-    } catch {
-      showNotification('error al conectar con la api', 'error');
+    } catch (error) {
+      showNotification(getApiErrorMessage(error, 'error al conectar con la api'), 'error');
     } finally {
       setLoading(false);
     }
@@ -96,21 +173,29 @@ export default function UsersPage({ isAdmin }) {
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={() => setIsModalOpen(true)}
+            onClick={openCreateModal}
           >
             agregar usuario
           </Button>
         )}
       </Box>
 
-      <UserList users={users} onDelete={handleDeleteUser} canManage={isAdmin} />
+      <UserList
+        users={users}
+        onDelete={handleDeleteUser}
+        onEdit={openEditModal}
+        canManage={isAdmin}
+      />
 
       {isAdmin && (
         <UserForm
+          key={`${formMode}-${selectedUser?._id || 'new'}-${isModalOpen ? 'open' : 'closed'}`}
           open={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleAddUser}
+          onClose={closeForm}
+          onSubmit={handleSubmitUser}
           loading={loading}
+          mode={formMode}
+          initialValues={selectedUser}
         />
       )}
 

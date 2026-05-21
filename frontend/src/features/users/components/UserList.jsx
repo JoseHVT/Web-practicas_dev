@@ -1,7 +1,8 @@
-import { TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper, Button, Typography } from '@mui/material';
+import { TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Paper, Button, Stack, Typography } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
-export default function UserList({ users, onDelete, canManage }) {
+export default function UserList({ users, onDelete, onEdit, canManage }) {
   if (!users || users.length === 0) {
     return (
       <Paper sx={{ p: 3, textAlign: 'center' }}>
@@ -29,14 +30,24 @@ export default function UserList({ users, onDelete, canManage }) {
               <TableCell>{user.role}</TableCell>
               {canManage && (
                 <TableCell align="right">
-                  <Button
-                    color="error"
-                    size="small"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => onDelete(user._id)}
-                  >
-                    eliminar
-                  </Button>
+                  <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    <Button
+                      color="primary"
+                      size="small"
+                      startIcon={<EditIcon />}
+                      onClick={() => onEdit(user)}
+                    >
+                      editar
+                    </Button>
+                    <Button
+                      color="error"
+                      size="small"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => onDelete(user._id)}
+                    >
+                      eliminar
+                    </Button>
+                  </Stack>
                 </TableCell>
               )}
             </TableRow>

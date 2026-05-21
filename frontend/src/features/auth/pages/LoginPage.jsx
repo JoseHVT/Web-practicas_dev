@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Alert, Box, Button, Paper, Tab, Tabs, TextField, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../../../shared/services/apiClient';
+import { getApiErrorMessage } from '../../../shared/utils/apiErrors';
 import { saveAuthSession } from '../../../shared/utils/authSession';
-
-const API_URL = 'http://localhost:3000/login';
 
 const initialRegisterForm = {
   username: '',
@@ -50,12 +49,12 @@ export default function Login({ onLogin }) {
       setLoading(true);
       setMessage({ type: '', text: '' });
 
-      const response = await axios.post(API_URL, loginForm);
+      const response = await apiClient.post('/login', loginForm);
       saveSession(response.data.token, response.data.data);
     } catch (requestError) {
       setMessage({
         type: 'error',
-        text: requestError.response?.data?.message || 'no se pudo iniciar sesion'
+        text: getApiErrorMessage(requestError, 'no se pudo iniciar sesion')
       });
     } finally {
       setLoading(false);
@@ -79,8 +78,8 @@ export default function Login({ onLogin }) {
       setLoading(true);
       setMessage({ type: '', text: '' });
 
-      await axios.post(`${API_URL}/register`, registerForm);
-      const loginResponse = await axios.post(API_URL, {
+      await apiClient.post('/login/register', registerForm);
+      const loginResponse = await apiClient.post('/login', {
         username: registerForm.username,
         password: registerForm.password
       });
@@ -90,7 +89,7 @@ export default function Login({ onLogin }) {
     } catch (requestError) {
       setMessage({
         type: 'error',
-        text: requestError.response?.data?.message || 'no se pudo registrar la cuenta'
+        text: getApiErrorMessage(requestError, 'no se pudo registrar la cuenta')
       });
     } finally {
       setLoading(false);
