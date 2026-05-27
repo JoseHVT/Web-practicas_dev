@@ -4,6 +4,7 @@ const {
   isCryptoHash,
   verifyPassword
 } = require('../../utils/passwordHash');
+const { MIN_PASSWORD_LENGTH } = require('../../utils/passwordRules');
 
 const loginAccountSchema = new mongoose.Schema({
   user: {
@@ -25,7 +26,7 @@ const loginAccountSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 6
+    minlength: MIN_PASSWORD_LENGTH
   },
   active: {
     type: Boolean,

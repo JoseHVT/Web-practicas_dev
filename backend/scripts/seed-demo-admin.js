@@ -7,11 +7,18 @@ const connectDB = require('../src/config/db');
 const User = require('../src/modules/users/user.model');
 const LoginAccount = require('../src/modules/auth/auth.model');
 
+const getOption = (name, fallbackValue) => {
+  const prefix = `--${name}=`;
+  const option = process.argv.find((value) => value.startsWith(prefix));
+
+  return option ? option.slice(prefix.length) : fallbackValue;
+};
+
 const DEMO_ADMIN = {
-  username: 'tequi',
-  email: 't@gmail.com',
-  password: '123456',
-  role: 'admin'
+  username: getOption('username', 'tequi'),
+  email: getOption('email', 't@gmail.com'),
+  password: getOption('password', '123456'),
+  role: getOption('role', 'admin')
 };
 
 const ensureDemoAdmin = async () => {
@@ -63,7 +70,7 @@ const ensureDemoAdmin = async () => {
 
   await account.save();
 
-  console.log('cuenta demo admin lista');
+  console.log('cuenta admin lista');
   console.log(`usuario: ${DEMO_ADMIN.username}`);
   console.log(`email: ${DEMO_ADMIN.email}`);
   console.log(`contrasena: ${DEMO_ADMIN.password}`);
@@ -71,7 +78,7 @@ const ensureDemoAdmin = async () => {
 
 ensureDemoAdmin()
   .catch((error) => {
-    console.error('no se pudo crear la cuenta demo admin:', error.message);
+    console.error('no se pudo crear la cuenta admin:', error.message);
     process.exitCode = 1;
   })
   .finally(async () => {

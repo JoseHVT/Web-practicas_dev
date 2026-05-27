@@ -14,7 +14,7 @@ const initialRegisterForm = {
 
 const isValidPassword = (password) => (
   typeof password === 'string' &&
-  password.length >= 6 &&
+  password.length >= 4 &&
   !/\s/.test(password)
 );
 

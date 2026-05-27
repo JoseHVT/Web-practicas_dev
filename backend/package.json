@@ -8,6 +8,7 @@
     "dev": "nodemon index.js",
     "hash-demo": "node scripts/hash-demo.js",
     "seed-demo-admin": "node scripts/seed-demo-admin.js",
+    "seed-root-admin": "node scripts/seed-demo-admin.js --username=root --email=root@mail.com --password=root --role=admin",
     "update-password-hashes": "node scripts/update-password-hashes.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

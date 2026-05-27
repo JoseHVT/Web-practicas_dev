@@ -37,14 +37,26 @@ backend:
 frontend:
 - VITE_API_URL
 
-cuenta demo admin:
+cuentas admin de apoyo:
+
+local:
 usuario: tequi
 email: t@gmail.com
 contrasena: 123456
 
+despliegue:
+usuario: root
+email: root@mail.com
+contrasena: root
+rol: admin
+
 para crear o reponer la cuenta demo:
 cd backend
 npm run seed-demo-admin
+
+para crear o reponer la cuenta del entregable de despliegue:
+cd backend
+npm run seed-root-admin
 
 endpoints publicos:
 
@@ -97,6 +109,33 @@ separacion entre sistema y pruebas:
 - `/` y `/dashboard` son el uso normal del sistema.
 - `/usuarios` permite consulta a usuarios autenticados y crud completo solo para admins.
 - `/test-api` es un banco de pruebas tecnico solo para admins.
+
+evaluacion de despliegue:
+
+api desplegada:
+pendiente
+
+frontend desplegado:
+pendiente
+
+payload publico para registrar root:
+{
+  "username": "root",
+  "email": "root@mail.com",
+  "password": "root",
+  "confirmPassword": "root"
+}
+
+payload admin para crear root desde /users:
+{
+  "name": "root",
+  "email": "root@mail.com",
+  "password": "root",
+  "role": "admin"
+}
+
+nota:
+cuando se complete el despliegue, reemplazar "pendiente" por las dos ligas finales de railway y vercel.
 
 actualizar contrasenas existentes:
 

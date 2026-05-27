@@ -1,4 +1,4 @@
-# deploy en railway
+# deploy en railway y vercel
 
 ## resumen
 
@@ -32,9 +32,21 @@ ALLOWED_ORIGIN=https://tu-frontend-publico.com
    - `POST /login`
    - `GET /users` con token valido
 
-## frontend
+7. una vez arriba, crea la cuenta de evaluacion:
 
-1. crea otro servicio desde github.
+```bash
+npm run seed-root-admin
+```
+
+esto deja disponible:
+
+- usuario: `root`
+- email: `root@mail.com`
+- contrasena: `root`
+
+## frontend en vercel
+
+1. crea un nuevo proyecto en vercel desde github.
 2. selecciona el mismo repositorio.
 3. configura `root directory` en `frontend`.
 4. carga esta variable:
@@ -52,5 +64,6 @@ VITE_API_URL=https://tu-backend-publico.railway.app
 ## notas
 
 - `/test-api` se mantiene como banco tecnico solo para admin.
+- la cuenta `root` se crea solo para la evaluacion de este entregable.
 - la cuenta demo admin no debe sembrarse automaticamente en produccion.
 - si usas dominio propio, actualiza `ALLOWED_ORIGIN` al dominio final del frontend.

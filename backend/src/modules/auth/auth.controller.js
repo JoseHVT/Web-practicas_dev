@@ -1,6 +1,7 @@
 const LoginAccount = require('./auth.model');
 const User = require('../users/user.model');
 const { createToken } = require('../../utils/jwt');
+const { isValidPasswordInput } = require('../../utils/passwordRules');
 
 const normalizeUsername = (value) => (
   typeof value === 'string' ? value.trim() : value
@@ -11,12 +12,6 @@ const normalizeEmail = (value) => (
 );
 
 const isDuplicateKeyError = (error) => error?.code === 11000;
-
-const isValidPassword = (password) => (
-  typeof password === 'string' &&
-  password.length >= 6 &&
-  !/\s/.test(password)
-);
 
 exports.login = async (req, res) => {
   try {
@@ -30,7 +25,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    if (!isValidPassword(password)) {
+    if (!isValidPasswordInput(password)) {
       return res.status(400).json({
         success: false,
         message: 'contrasena invalida'
@@ -101,7 +96,7 @@ exports.register = async (req, res) => {
       });
     }
 
-    if (!isValidPassword(password)) {
+    if (!isValidPasswordInput(password)) {
       return res.status(400).json({
         success: false,
         message: 'contrasena invalida'
@@ -280,7 +275,7 @@ exports.updatePassword = async (req, res) => {
       });
     }
 
-    if (!isValidPassword(newPassword)) {
+    if (!isValidPasswordInput(newPassword)) {
       return res.status(400).json({
         success: false,
         message: 'contrasena invalida'

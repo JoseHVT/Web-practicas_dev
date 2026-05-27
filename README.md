@@ -28,17 +28,29 @@ npm run dev
 
 el backend usa `http://localhost:3000`.
 
-cuenta demo admin:
+cuentas admin de apoyo:
 
-- usuario: `tequi`
-- email: `t@gmail.com`
-- contrasena: `123456`
+- local y pruebas previas:
+  - usuario: `tequi`
+  - email: `t@gmail.com`
+  - contrasena: `123456`
+- despliegue y evaluacion:
+  - usuario: `root`
+  - email: `root@mail.com`
+  - contrasena: `root`
 
-para crearla o reponerla:
+para crear o reponer la cuenta local:
 
 ```bash
 cd backend
 npm run seed-demo-admin
+```
+
+para crear o reponer la cuenta pedida en la entrega de despliegue:
+
+```bash
+cd backend
+npm run seed-root-admin
 ```
 
 variables recomendadas:
@@ -70,6 +82,8 @@ VITE_API_URL=http://localhost:3000
 ## seguridad de contrasenas
 
 el backend guarda contrasenas con `crypto.scrypt` de node.js. el metodo usa sal aleatoria y pimienta configurable con `PASSWORD_PEPPER`.
+
+para esta entrega, la politica actual acepta contrasenas de 4 caracteres o mas, sin espacios. esto permite cumplir la evaluacion con `root/root`.
 
 prueba de hash:
 
@@ -115,6 +129,42 @@ en frontend:
 - `/dashboard` es la vista principal tras login
 - `/usuarios` permite consulta para usuarios autenticados y crud completo para admins
 - `/test-api` es un banco de pruebas tecnico solo para admins
+
+## despliegue y evaluacion
+
+flujo recomendado para la entrega:
+
+1. desplegar la api en railway.
+2. desplegar el frontend en vercel.
+3. crear la cuenta `root` en la base del entorno desplegado.
+4. pegar las dos ligas finales en `ENTREGA.txt`.
+
+payload publico para registrar `root` desde la api:
+
+```json
+{
+  "username": "root",
+  "email": "root@mail.com",
+  "password": "root",
+  "confirmPassword": "root"
+}
+```
+
+payload administrativo para crear `root` desde `POST /users`:
+
+```json
+{
+  "name": "root",
+  "email": "root@mail.com",
+  "password": "root",
+  "role": "admin"
+}
+```
+
+ligas finales a completar al terminar el despliegue:
+
+- api: `pendiente`
+- frontend: `pendiente`
 
 ## validacion
 

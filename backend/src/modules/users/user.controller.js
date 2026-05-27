@@ -1,5 +1,6 @@
 const User = require('./user.model');
 const LoginAccount = require('../auth/auth.model');
+const { isValidPasswordInput } = require('../../utils/passwordRules');
 
 const normalizeName = (value) => (
   typeof value === 'string' ? value.trim() : value
@@ -10,12 +11,6 @@ const normalizeEmail = (value) => (
 );
 
 const isDuplicateKeyError = (error) => error?.code === 11000;
-
-const isValidPassword = (password) => (
-  typeof password === 'string' &&
-  password.length >= 6 &&
-  !/\s/.test(password)
-);
 
 exports.getUsers = async (req, res) => {
   try {
@@ -73,7 +68,7 @@ exports.createUser = async (req, res) => {
       });
     }
 
-    if (!isValidPassword(password)) {
+    if (!isValidPasswordInput(password)) {
       return res.status(400).json({
         success: false,
         message: 'contrasena invalida'
