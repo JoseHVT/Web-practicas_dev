@@ -1,0 +1,35 @@
+entrega final
+
+repositorio:
+https://github.com/JoseHVT/Web-practicas_dev.git
+
+frontend desplegado:
+https://web-practicas-dev.vercel.app
+
+api desplegada:
+https://web-practicas-dev-api.onrender.com
+
+health check:
+https://web-practicas-dev-api.onrender.com/ping
+
+cuenta de evaluacion:
+usuario: root
+email: root@mail.com
+contrasena: root
+rol: admin
+
+payload publico para registrar root:
+{
+  "username": "root",
+  "email": "root@mail.com",
+  "password": "root",
+  "confirmPassword": "root"
+}
+
+payload admin para crear root desde /users:
+{
+  "name": "root",
+  "email": "root@mail.com",
+  "password": "root",
+  "role": "admin"
+}

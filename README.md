@@ -1,180 +1,22 @@
 # web-practicas_dev
 
-proyecto web con frontend en react y backend en node.js, express y mongodb.
+app web con login, jwt y administracion de usuarios.
 
-repositorio:
-https://github.com/JoseHVT/Web-practicas_dev.git
+## ligas activas
+
+- frontend: `https://web-practicas-dev.vercel.app`
+- api: `https://web-practicas-dev-api.onrender.com`
 
 ## estructura
 
-- `backend`: rest api con express, mongoose, mongodb, crypto y jsonwebtoken.
-- `frontend`: cliente react con vite y material ui.
-- `ENTREGA.txt`: archivo de entrega con el link del repositorio e instrucciones basicas.
-- `Web_A6_Servicios_web.md`: especificacion de servicios web.
-- `DEPLOY_RAILWAY.md`: guia breve para publicar backend y frontend.
+- `frontend/`: cliente react con vite
+- `backend/`: api express con mongodb
+- `doc/`: documentacion funcional, tecnica y de entrega
 
-## requisitos
+## documentacion
 
-- node.js y npm.
-- mongodb ejecutandose en `localhost:27017`, o `MONGODB_URI` configurado.
-
-## backend
-
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-el backend usa `http://localhost:3000`.
-
-cuentas admin de apoyo:
-
-- local y pruebas previas:
-  - usuario: `tequi`
-  - email: `t@gmail.com`
-  - contrasena: `123456`
-- despliegue y evaluacion:
-  - usuario: `root`
-  - email: `root@mail.com`
-  - contrasena: `root`
-
-para crear o reponer la cuenta local:
-
-```bash
-cd backend
-npm run seed-demo-admin
-```
-
-para crear o reponer la cuenta pedida en la entrega de despliegue:
-
-```bash
-cd backend
-npm run seed-root-admin
-```
-
-variables recomendadas:
-
-```env
-MONGODB_URI=mongodb://localhost:27017/login_db
-PASSWORD_PEPPER=cambia_este_valor
-JWT_SECRET=cambia_este_valor
-JWT_EXPIRES_IN=1h
-ALLOWED_ORIGIN=http://localhost:5173
-```
-
-## frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-el frontend usa `http://localhost:5173`.
-
-variable recomendada:
-
-```env
-VITE_API_URL=http://localhost:3000
-```
-
-## seguridad de contrasenas
-
-el backend guarda contrasenas con `crypto.scrypt` de node.js. el metodo usa sal aleatoria y pimienta configurable con `PASSWORD_PEPPER`.
-
-para esta entrega, la politica actual acepta contrasenas de 4 caracteres o mas, sin espacios. esto permite cumplir la evaluacion con `root/root`.
-
-prueba de hash:
-
-```bash
-cd backend
-npm run hash-demo
-```
-
-## jwt
-
-el login genera un token jwt firmado con `jsonwebtoken`.
-
-las rutas protegidas requieren header:
-
-```http
-Authorization: Bearer <token>
-```
-
-rutas publicas:
-
-- `POST /login`
-- `POST /login/register`
-
-rutas protegidas para cualquier usuario autenticado:
-
-- `GET /users`
-- `GET /users/:id`
-- `PUT /login/password`
-- `GET /dashboard/kpis`
-- `GET /dashboard/charts/registrations`
-
-rutas protegidas solo para administradores:
-
-- `POST /users`
-- `PUT /users/:id`
-- `DELETE /users/:id`
-- `GET /login`
-- `DELETE /login/:id`
-
-en frontend:
-
-- `/` es el acceso normal al sistema
-- `/dashboard` es la vista principal tras login
-- `/usuarios` permite consulta para usuarios autenticados y crud completo para admins
-- `/test-api` es un banco de pruebas tecnico solo para admins
-
-## despliegue y evaluacion
-
-flujo recomendado para la entrega:
-
-1. desplegar la api en railway.
-2. desplegar el frontend en vercel.
-3. crear la cuenta `root` en la base del entorno desplegado.
-4. pegar las dos ligas finales en `ENTREGA.txt`.
-
-payload publico para registrar `root` desde la api:
-
-```json
-{
-  "username": "root",
-  "email": "root@mail.com",
-  "password": "root",
-  "confirmPassword": "root"
-}
-```
-
-payload administrativo para crear `root` desde `POST /users`:
-
-```json
-{
-  "name": "root",
-  "email": "root@mail.com",
-  "password": "root",
-  "role": "admin"
-}
-```
-
-ligas finales a completar al terminar el despliegue:
-
-- api: `pendiente`
-- frontend: `pendiente`
-
-## validacion
-
-comandos usados para revisar el proyecto:
-
-```bash
-cd backend
-npm run hash-demo
-
-cd ../frontend
-npm run lint
-npm run build
-```
+- `doc/README.md`
+- `doc/local.md`
+- `doc/api.md`
+- `doc/deploy.md`
+- `doc/entrega.txt`
