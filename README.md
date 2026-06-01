@@ -20,3 +20,12 @@ app web con login, jwt y administracion de usuarios.
 - `doc/api.md`
 - `doc/deploy.md`
 - `doc/entrega.txt`
+- `frontend/entrega9.md`
+
+## entrega 9
+
+se agrego al frontend:
+
+- detalle por url dinamica en `"/usuarios/:id"`
+- hooks personalizados `useAuth` y `useAdmin`
+- demo de ciclo de vida con `useEffect` en dashboard

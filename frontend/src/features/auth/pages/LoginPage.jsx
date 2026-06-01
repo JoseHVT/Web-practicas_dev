@@ -18,7 +18,7 @@ const isValidPassword = (password) => (
   !/\s/.test(password)
 );
 
-export default function Login({ onLogin }) {
+export default function Login() {
   const [mode, setMode] = useState('login');
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [registerForm, setRegisterForm] = useState(initialRegisterForm);
@@ -33,7 +33,6 @@ export default function Login({ onLogin }) {
 
   const saveSession = (token, user) => {
     saveAuthSession(token, user);
-    onLogin({ token, user });
     navigate('/dashboard');
   };
 

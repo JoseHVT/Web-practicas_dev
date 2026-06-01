@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Alert, Box, Card, CardContent, CircularProgress, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import apiClient from '../../../shared/services/apiClient';
 import { getApiErrorMessage } from '../../../shared/utils/apiErrors';
+import LifecycleDemo from '../components/LifecycleDemo';
 
 const getDefaultRange = () => {
   const end = new Date();
@@ -19,6 +20,7 @@ export default function Dashboard() {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showLifecycleDemo, setShowLifecycleDemo] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -163,6 +165,28 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
+
+          <Box sx={{ mt: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+              <Box>
+                <Typography variant="h6">
+                  demo de useEffect
+                </Typography>
+                <Typography color="text.secondary">
+                  usa el boton para montar y desmontar el componente y revisa la consola.
+                </Typography>
+              </Box>
+
+              <Button
+                variant={showLifecycleDemo ? 'outlined' : 'contained'}
+                onClick={() => setShowLifecycleDemo((current) => !current)}
+              >
+                {showLifecycleDemo ? 'ocultar demo' : 'mostrar demo'}
+              </Button>
+            </Box>
+
+            {showLifecycleDemo && <LifecycleDemo />}
+          </Box>
         </>
       )}
     </Box>
