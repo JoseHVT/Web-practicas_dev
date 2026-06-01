@@ -72,3 +72,5 @@ npm run build
 ## nota
 
 en desarrollo puede haber eventos duplicados en consola por `strictmode` de react. para la practica sigue siendo valido porque el componente si demuestra montaje, actualizacion y desmontaje.
+
+para que la ruta dinamica funcione tambien al refrescar en vercel, se agrego `frontend/vercel.json` con un rewrite de spa hacia `index.html`.
